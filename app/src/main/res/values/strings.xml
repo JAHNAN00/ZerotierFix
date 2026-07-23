@@ -153,4 +153,13 @@
     <string name="dialog_no_notification_alert_title">Notification Permission Not Granted</string>
     <string name="open_notification_settings">Goto notification settings</string>
     <string name="dont_show_again">Don\'t show again</string>
+    <string name="quick_settings_tile">Quick Settings Tile</string>
+    <string name="tile_label">Zerotier</string>
+    <string name="tile_unconfigured">Zerotier: Not configured</string>
+    <string name="tile_binding_description">Choose a network for the Zerotier Quick Settings button. The button will start or stop only this network.</string>
+    <string name="tile_network_option">%1$s\n%2$s</string>
+    <string name="tile_no_networks">Add a network before binding the Quick Settings button.</string>
+    <string name="tile_clear_binding">Clear binding</string>
+    <string name="notification_title_connecting">Connecting Zerotier</string>
+    <string name="notification_text_connecting">Starting network %1$s</string>
 </resources>

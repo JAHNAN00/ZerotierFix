@@ -151,4 +151,13 @@
     <string name="dialog_no_notification_alert_title">未开启通知权限</string>
     <string name="open_notification_settings">打开通知设置</string>
     <string name="dont_show_again">不再提示</string>
+    <string name="quick_settings_tile">快捷开关</string>
+    <string name="tile_label">Zerotier</string>
+    <string name="tile_unconfigured">Zerotier：未配置</string>
+    <string name="tile_binding_description">选择一个网络绑定到 Zerotier 快捷开关。该按钮只会开启或关闭此网络。</string>
+    <string name="tile_network_option">%1$s\n%2$s</string>
+    <string name="tile_no_networks">请先添加网络，再绑定快捷开关。</string>
+    <string name="tile_clear_binding">清除绑定</string>
+    <string name="notification_title_connecting">正在连接 Zerotier</string>
+    <string name="notification_text_connecting">正在启动网络 %1$s</string>
 </resources>

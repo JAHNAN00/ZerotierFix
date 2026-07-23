@@ -81,6 +81,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 // TODO: clear up
 public class ZeroTierOneService extends VpnService implements Runnable, EventListener, VirtualNetworkConfigListener {
+    public static final String ACTION_TOGGLE = "net.jahnan00.zerotierfix.action.TOGGLE";
+    public static final String ACTION_STOP = "net.jahnan00.zerotierfix.action.STOP";
     public static final int MSG_JOIN_NETWORK = 1;
     public static final int MSG_LEAVE_NETWORK = 2;
     public static final String ZT1_NETWORK_ID = "com.zerotier.one.network_id";
@@ -210,6 +212,31 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
     };
     private Thread vpnThread;
 
+    public static void start(Context context, long networkId) {
+        Intent intent = new Intent(context, ZeroTierOneService.class);
+        intent.putExtra(ZT1_NETWORK_ID, networkId);
+        startService(context, intent);
+    }
+
+    public static void toggle(Context context, long networkId) {
+        Intent intent = new Intent(context, ZeroTierOneService.class)
+                .setAction(ACTION_TOGGLE)
+                .putExtra(ZT1_NETWORK_ID, networkId);
+        startService(context, intent);
+    }
+
+    public static void stop(Context context) {
+        startService(context, new Intent(context, ZeroTierOneService.class).setAction(ACTION_STOP));
+    }
+
+    private static void startService(Context context, Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(context, intent);
+        } else {
+            context.startService(intent);
+        }
+    }
+
     public VirtualNetworkConfig getVirtualNetworkConfig(long j) {
         VirtualNetworkConfig virtualNetworkConfig;
         synchronized (this.virtualNetworkConfigMap) {
@@ -275,6 +302,18 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
         }
         this.mStartID = startId;
 
+        if (ACTION_STOP.equals(intent.getAction())) {
+            stopZeroTier();
+            return START_NOT_STICKY;
+        }
+
+        // A Tile toggle is resolved by the service's actual state, not a cached UI value.
+        if (ACTION_TOGGLE.equals(intent.getAction())
+                && (this.node != null || this.vpnSocket != null)) {
+            stopZeroTier();
+            return START_NOT_STICKY;
+        }
+
         // 注册事件总线监听器
         if (!this.eventBus.isRegistered(this)) {
             this.eventBus.register(this);
@@ -316,6 +355,7 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
             return START_NOT_STICKY;
         }
         this.networkId = networkId;
+        showConnectingNotification(networkId);
 
         // 检查当前的网络环境
         var preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -422,6 +462,8 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
     }
 
     public void stopZeroTier() {
+        clearConnectionState();
+        stopForeground(true);
         if (this.svrSocket != null) {
             this.svrSocket.close();
             this.svrSocket = null;
@@ -932,6 +974,7 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
         this.tunTapAdapter.setVpnSocket(this.vpnSocket);
         this.tunTapAdapter.setFileStreams(this.in, this.out);
         this.tunTapAdapter.startThreads();
+        setConnectionState(networkId);
 
         // 状态栏提示
         if (this.notificationManager == null) {
@@ -963,7 +1006,7 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
                 .setContentText(getString(R.string.notification_text_connected, network.getNetworkIdStr()))
                 .setColor(ContextCompat.getColor(getApplicationContext(), R.color.zerotier_orange))
                 .setContentIntent(pendingIntent).build();
-        this.notificationManager.notify(ZT_NOTIFICATION_TAG, notification);
+        startForeground(ZT_NOTIFICATION_TAG, notification);
         Log.i(TAG, "ZeroTier One Connected");
 
         // 旧版本 Android 多播处理
@@ -976,6 +1019,61 @@ public class ZeroTierOneService extends VpnService implements Runnable, EventLis
             }
         }
         return true;
+    }
+
+    private void showConnectingNotification(long networkId) {
+        if (this.notificationManager == null) {
+            this.notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            var channel = new NotificationChannel(
+                    Constants.CHANNEL_ID,
+                    getString(R.string.channel_name),
+                    NotificationManager.IMPORTANCE_LOW);
+            channel.setDescription(getString(R.string.channel_description));
+            this.notificationManager.createNotificationChannel(channel);
+        }
+        int pendingIntentFlag = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pendingIntentFlag |= PendingIntent.FLAG_IMMUTABLE;
+        }
+        var pendingIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, NetworkListActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                | Intent.FLAG_ACTIVITY_CLEAR_TOP),
+                pendingIntentFlag);
+        var notification = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(getString(R.string.notification_title_connecting))
+                .setContentText(getString(R.string.notification_text_connecting,
+                        Long.toHexString(networkId)))
+                .setContentIntent(pendingIntent)
+                .build();
+        startForeground(ZT_NOTIFICATION_TAG, notification);
+    }
+
+    private void setConnectionState(long activeNetworkId) {
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putBoolean(Constants.PREF_TILE_RUNNING, true)
+                .putLong(Constants.PREF_ACTIVE_NETWORK_ID, activeNetworkId)
+                .apply();
+        publishConnectionState();
+    }
+
+    private void clearConnectionState() {
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putBoolean(Constants.PREF_TILE_RUNNING, false)
+                .remove(Constants.PREF_ACTIVE_NETWORK_ID)
+                .apply();
+        publishConnectionState();
+    }
+
+    private void publishConnectionState() {
+        sendBroadcast(new Intent(Constants.ACTION_CONNECTION_STATE_CHANGED)
+                .setPackage(getPackageName()));
+        ZeroTierTileService.refresh(this);
     }
 
     private void addDNSServers(VpnService.Builder builder, Network network) {

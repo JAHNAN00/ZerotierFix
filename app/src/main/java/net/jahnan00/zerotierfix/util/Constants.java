@@ -19,6 +19,17 @@ public class Constants {
 
     public static final String PREF_DISABLE_NO_NOTIFICATION_ALERT = "disable_no_notification_alert";
 
+    public static final String PREF_TILE_NETWORK_ID = "quick_settings_tile_network_id";
+
+    public static final String PREF_TILE_NETWORK_NAME = "quick_settings_tile_network_name";
+
+    public static final String PREF_TILE_RUNNING = "quick_settings_tile_running";
+
+    public static final String PREF_ACTIVE_NETWORK_ID = "active_network_id";
+
+    public static final String ACTION_CONNECTION_STATE_CHANGED =
+            "net.jahnan00.zerotierfix.action.CONNECTION_STATE_CHANGED";
+
     public static final String FILE_CUSTOM_PLANET = "planet.custom";
 
     public static final String FILE_TEMP = "temp";

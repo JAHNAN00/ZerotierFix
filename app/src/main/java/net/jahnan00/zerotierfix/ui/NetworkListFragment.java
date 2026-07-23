@@ -1,11 +1,13 @@
 package net.jahnan00.zerotierfix.ui;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.VpnService;
@@ -29,6 +31,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
@@ -65,6 +68,7 @@ import net.jahnan00.zerotierfix.model.NetworkConfigDao;
 import net.jahnan00.zerotierfix.model.NetworkDao;
 import net.jahnan00.zerotierfix.model.type.NetworkStatus;
 import net.jahnan00.zerotierfix.service.ZeroTierOneService;
+import net.jahnan00.zerotierfix.service.ZeroTierTileService;
 import net.jahnan00.zerotierfix.ui.view.NetworkDetailActivity;
 import net.jahnan00.zerotierfix.ui.viewmodel.NetworkListModel;
 import net.jahnan00.zerotierfix.util.Constants;
@@ -136,6 +140,13 @@ public class NetworkListFragment extends Fragment {
     };
     private ActivityResultLauncher<Intent> vpnAuthLauncher;
     private NetworkListModel viewModel;
+    private boolean connectionStateReceiverRegistered;
+    private final BroadcastReceiver connectionStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            syncConnectionState();
+        }
+    };
 
     public NetworkListFragment() {
         Log.d(TAG, "Network List Fragment created");
@@ -219,6 +230,7 @@ public class NetworkListFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        unregisterConnectionStateReceiver();
         this.eventBus.unregister(this);
     }
 
@@ -294,6 +306,8 @@ public class NetworkListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        registerConnectionStateReceiver();
+        syncConnectionState();
         this.nodeStatusView.setText(R.string.status_offline);
         this.eventBus.register(this);
         this.eventBus.post(new IsServiceRunningRequestEvent());
@@ -324,6 +338,9 @@ public class NetworkListFragment extends Fragment {
         } else if (menuId == R.id.menu_item_orbit) {
             Log.d(TAG, "Selected orbit");
             startActivity(new Intent(getActivity(), MoonOrbitActivity.class));
+            return true;
+        } else if (menuId == R.id.menu_item_quick_settings_tile) {
+            startActivity(new Intent(getActivity(), QuickSettingsTileActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(menuItem);
@@ -358,12 +375,8 @@ public class NetworkListFragment extends Fragment {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNetworkListReply(NetworkListReplyEvent event) {
         Log.d(TAG, "Got connecting network list");
-        // 更新当前连接的网络
-        var networks = event.getNetworkList();
-        for (var network : networks) {
-            this.viewModel.doChangeConnectNetwork(network.getNwid());
-        }
-        // 更新网络列表
+        // The VPN service owns the active-network state; SDK configs can be stale during startup.
+        syncConnectionState();
         updateNetworkListAndNotify();
     }
 
@@ -486,10 +499,33 @@ public class NetworkListFragment extends Fragment {
      * @param networkId 网络号
      */
     private void startService(long networkId) {
-        var intent = new Intent(requireActivity(), ZeroTierOneService.class);
-        intent.putExtra(ZeroTierOneService.ZT1_NETWORK_ID, networkId);
         doBindService();
-        requireActivity().startService(intent);
+        ZeroTierOneService.start(requireActivity(), networkId);
+    }
+
+    private void registerConnectionStateReceiver() {
+        if (!connectionStateReceiverRegistered) {
+            ContextCompat.registerReceiver(requireContext(), connectionStateReceiver,
+                    new IntentFilter(Constants.ACTION_CONNECTION_STATE_CHANGED),
+                    ContextCompat.RECEIVER_NOT_EXPORTED);
+            connectionStateReceiverRegistered = true;
+        }
+    }
+
+    private void unregisterConnectionStateReceiver() {
+        if (connectionStateReceiverRegistered) {
+            requireContext().unregisterReceiver(connectionStateReceiver);
+            connectionStateReceiverRegistered = false;
+        }
+    }
+
+    private void syncConnectionState() {
+        long activeNetworkId = PreferenceManager.getDefaultSharedPreferences(requireContext())
+                .getLong(Constants.PREF_ACTIVE_NETWORK_ID, 0);
+        this.viewModel.doChangeConnectNetwork(activeNetworkId == 0 ? null : activeNetworkId);
+        if (this.recyclerViewAdapter != null) {
+            this.recyclerViewAdapter.notifyDataSetChanged();
+        }
     }
 
     /**
@@ -747,6 +783,15 @@ public class NetworkListFragment extends Fragment {
                                 networkConfigDao.delete(networkConfig);
                             }
                             networkDao.delete(this.mItem);
+                            var preferences = PreferenceManager.getDefaultSharedPreferences(that.requireContext());
+                            if (preferences.getLong(Constants.PREF_TILE_NETWORK_ID, 0)
+                                    == this.mItem.getNetworkId()) {
+                                preferences.edit()
+                                        .remove(Constants.PREF_TILE_NETWORK_ID)
+                                        .remove(Constants.PREF_TILE_NETWORK_NAME)
+                                        .apply();
+                                ZeroTierTileService.refresh(that.requireContext());
+                            }
                         }
                         daoSession.clear();
                         // 更新数据
