@@ -5,6 +5,10 @@ plugins {
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
+    sourceSets {
+        main.java.srcDirs += '../externals/core/java/src'
+    }
+
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
