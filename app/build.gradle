@@ -5,14 +5,14 @@ plugins {
 
 greendao {
     schemaVersion 22
-    daoPackage 'net.kaaass.zerotierfix.model'
+    daoPackage 'net.jahnan00.zerotierfix.model'
 }
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "net.kaaass.zerotierfix"
+        applicationId "net.jahnan00.zerotierfix"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 14
@@ -40,7 +40,7 @@ android {
             exclude module: 'commons-logging'
         }
     }
-    namespace 'net.kaaass.zerotierfix'
+    namespace 'net.jahnan00.zerotierfix'
 }
 
 dependencies {
