@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="surface_base">#FF121315</color>
+    <color name="surface_card">#FF1C1D20</color>
+    <color name="surface_subtle">#FF25262A</color>
+    <color name="outline_subtle">#FF37383D</color>
+    <color name="fab_neutral">#FFBFC0C4</color>
+</resources>

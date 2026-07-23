@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title">
+  <title>Zerotier Fix icon preview</title>
+  <rect width="1024" height="1024" rx="224" fill="#000000"/>
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="square" strokshe-linejoin="miter">
+    <path d="M332 336H692" stroke-width="44"/>
+    <path d="M512 336V704" stroke-width="44"/>
+    <circle cx="512" cy="512" r="132" stroke-width="44"/>
+  </g>
+</svg>

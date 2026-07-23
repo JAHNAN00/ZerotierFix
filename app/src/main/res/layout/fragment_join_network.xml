@@ -1,106 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragmentJoinNetwork"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:windowSoftInputMode="adjustUnspecified|stateHidden|adjustPan">
+    android:background="@color/surface_base">
 
-    <TextView
-        android:id="@+id/network_id_textview"
-        style="?android:attr/listSeparatorTextViewStyle"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:text="@string/network_id_string"
-        android:textStyle="bold"
-        android:labelFor="@id/join_network_edit_text"/>
-
-    <EditText
-        android:id="@+id/join_network_edit_text"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/network_id_textview"
-        android:layout_centerHorizontal="true"
-        android:digits="0123456789ABCDEFabcdef"
-        android:inputType="text"
-        android:maxLength="16"
-        android:textCursorDrawable="@null"
-        android:autofillHints="" />
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:padding="20dp">
 
-    <CheckBox
-        android:id="@+id/join_network_default_route"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/join_network_edit_text"
-        android:text="@string/default_route" />
-
-    <TextView
-        android:id="@+id/dns_textview"
-        style="?android:attr/listSeparatorTextViewStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/join_network_default_route"
-        android:text="@string/dns_label_string"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:id="@+id/dns_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/dns_textview"
-        android:layout_margin="10dp"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/dns_tab_layout"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="top">
+            android:orientation="vertical">
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/no_dns_layout"
+            <TextView
+                android:id="@+id/network_id_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:labelFor="@id/join_network_edit_text"
+                android:text="@string/network_id_string"
+                android:textColor="?attr/greyText"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/join_network_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/no_dns_tab_title" />
+                android:layout_marginTop="8dp"
+                android:autofillHints=""
+                android:background="@drawable/bg_surface_subtle"
+                android:digits="0123456789ABCDEFabcdef"
+                android:fontFamily="monospace"
+                android:inputType="text"
+                android:maxLength="16"
+                android:minHeight="52dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textCursorDrawable="@null"
+                android:textSize="16sp" />
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/network_dns_layout"
+            <CheckBox
+                android:id="@+id/join_network_default_route"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/network_dns_tab_title" />
+                android:layout_marginTop="12dp"
+                android:minHeight="48dp"
+                android:text="@string/default_route" />
 
-            <com.google.android.material.tabs.TabItem
-                android:id="@+id/custom_dns_layout"
+            <TextView
+                android:id="@+id/dns_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/dns_label_string"
+                android:textColor="?attr/greyText"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/dns_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/custom_dns_tab_title" />
-        </com.google.android.material.tabs.TabLayout>
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_surface_subtle"
+                android:orientation="vertical"
+                android:padding="8dp">
 
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/dns_view_pager"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/dns_tab_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:tabIndicatorColor="@color/teal_700"
+                    app:tabMode="scrollable"
+                    app:tabTextColor="?attr/lightGreyText"
+                    app:tabSelectedTextColor="?attr/greyText">
 
-        <Button
-            android:id="@+id/button_join_network"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:text="@string/join_network" />
-    </LinearLayout>
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/no_dns_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/no_dns_tab_title" />
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/network_dns_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/network_dns_tab_title" />
+                    <com.google.android.material.tabs.TabItem
+                        android:id="@+id/custom_dns_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/custom_dns_tab_title" />
+                </com.google.android.material.tabs.TabLayout>
+
+                <androidx.viewpager.widget.ViewPager
+                    android:id="@+id/dns_view_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/button_join_network"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/join_network" />
+        </LinearLayout>
+    </ScrollView>
 
     <android.inputmethodservice.KeyboardView
         android:id="@+id/join_network_keyboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
+        android:layout_gravity="bottom"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:visibility="gone" />
-</RelativeLayout>
+</FrameLayout>

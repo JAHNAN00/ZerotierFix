@@ -3,98 +3,108 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/network_list_fragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/surface_base">
 
-    <RelativeLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/joined_networks_list"
+        android:name="net.jahnan00.zerotierfix.ui.NetworkListFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="104dp"
+        app:layoutManager="LinearLayoutManager" />
 
-        <androidx.recyclerview.widget.RecyclerView xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/joined_networks_list"
-            android:name="net.jahnan00.zerotierfix.ui.NetworkListFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/status_bar"
-            android:layout_alignParentTop="true"
-            android:clipToPadding="false"
-            android:paddingBottom="80dp"
-            app:layoutManager="LinearLayoutManager"
-            tools:context=".ui.NetworkListFragment"
-            tools:listitem="@layout/list_item_network" />
+    <LinearLayout
+        android:id="@+id/no_data"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="40dp">
 
-        <RelativeLayout xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/no_data"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/status_bar"
-            android:layout_alignParentTop="true">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="@string/click_to_add_network"
-                android:textColor="?attr/lightGreyText"
-                android:textSize="36sp" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/status_bar"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_gravity="bottom"
-            android:background="@color/primary_green"
-            android:orientation="horizontal"
-            android:padding="5dp">
+            android:text="@string/click_to_add_network"
+            android:textAlignment="center"
+            android:textColor="?attr/greyText"
+            android:textSize="20sp" />
 
-            <TextView
-                android:id="@+id/node_id"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:gravity="center"
-                android:padding="5dp"
-                android:text=""
-                android:textColor="?attr/lightGreyText" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="+"
+            android:textColor="?attr/lightGreyText"
+            android:textSize="32sp" />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/node_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/node_id"
-                android:padding="5dp"
-                android:text="@string/status_offline"
-                android:textColor="?attr/lightGreyText" />
+    <LinearLayout
+        android:id="@+id/status_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_status_panel"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
 
-            <TextView
-                android:id="@+id/client_version"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/node_status"
-                android:padding="5dp"
-                android:text="@string/unknown_version"
-                android:textColor="?attr/lightGreyText" />
+        <TextView
+            android:id="@+id/node_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_offline"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/app_version"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/client_version"
-                android:text="@string/unknown_version"
-                android:textColor="?attr/lightGreyText" />
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/node_id"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="monospace"
+            android:maxLines="1"
+            android:textColor="@color/light_grey_text_night"
+            android:textSize="12sp" />
 
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/client_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/unknown_version"
+            android:textColor="@color/light_grey_text_night"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/app_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/unknown_version"
+            android:textColor="@color/light_grey_text_night"
+            android:textSize="12sp" />
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_network"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="56dp"
+        android:contentDescription="@string/join_network"
+        app:backgroundTint="@color/fab_neutral"
+        app:srcCompat="@android:drawable/ic_input_add"
+        app:tint="@color/white" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
